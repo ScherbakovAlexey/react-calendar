@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>React Tutorial</title>
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+<script src="https://unpkg.com/prop-types@15.6/prop-types.js"></script>
+<style>
+    .day {
+        width: 50px;
+        height: 50px;
+        background-color: cadetblue;
+        border: 1px solid grey;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .day:hover {
+        width: 50px;
+        height: 50px;
+        background-color:rgb(77, 126, 128);
+        border: 1px solid grey;
+        box-shadow: 5px 5px 10px rgb(45, 74, 75);
+        z-index: 999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .emptyday{
+        width: 50px;
+        height: 50px;
+        background-color: cadetblue;
+        border: 1px solid grey;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .daysContainer {
+        display: flex;
+        flex-flow: row wrap;
+        width: 364px;
+    }
+    .input {
+        margin-top: 10px;
+    }
+    .select{
+        background-color: cadetblue;
+        height: 30px;
+        width: 182px;
+    }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+    var currentDate = new Date();
+    var currentDay = currentDate.getDate();
+    var currentMonth = currentDate.getMonth(); // -1
+    var currentYear = currentDate.getFullYear();
+    var firstDayNum = new Date(currentYear, currentMonth, 1).getDay() || 7; // number in week
+    var lastDay = new Date(currentYear, currentMonth+1, 0).getDate();  // max days in month
+    var lastDayNum = (new Date(currentYear, currentMonth, lastDay).getDay()) || 7; // number in week 
+    const months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+    class App extends React.Component {
+        constructor(props) {
+        super(props);
+        this.state = {
+            month: currentMonth,
+            year: currentYear
+        };
+        this.handleMonthChange = this.handleMonthChange.bind(this);
+        this.handleYearChange = this.handleYearChange.bind(this);
+        this.updateCurrentDate = this.updateCurrentDate.bind(this);
+    }
+
+        handleMonthChange(month){
+            this.updateCurrentDate(month, this.state.year);
+            this.setState({month: month});
+        }
+
+        handleYearChange(year){
+            this.updateCurrentDate(this.state.month, year);
+            this.setState({year: year});
+        }
+
+        updateCurrentDate(month, year){
+            currentDate = new Date(year,month);
+            currentDay = currentDate.getDate();
+            currentMonth = currentDate.getMonth(); // -1
+            currentYear = currentDate.getFullYear();
+            firstDayNum = new Date(currentYear, currentMonth, 1).getDay() || 7; // number in week
+            lastDay = new Date(currentYear, currentMonth+1, 0).getDate();  // max days in month
+            lastDayNum = (new Date(currentYear, currentMonth, lastDay).getDay()) || 7; // number in week 
+        }
+        
+        render() {
+            return (
+                <React.Fragment>
+                    <Days />
+                    <Input onMonthChange={this.handleMonthChange} onYearChange={this.handleYearChange}/>
+                </React.Fragment>
+        )
+        }
+    }
+
+  class Days extends React.Component {
+    getMonth = () => {
+        let month = [];
+        let day = 1;
+        let numDivs = (firstDayNum-1) + lastDay + (7-lastDayNum);
+
+        for (var i=1; i<=numDivs; i++){
+            if ((i < firstDayNum) || (day > lastDay)) {
+                month.push(
+                <div className='emptyday' key={i}></div>
+            ); 
+            } else {
+                month.push(
+                <div className='day' key={i}>{day++}</div>
+            );
+            }
+        }
+        return month;
+    }
+      render() {
+          const month = this.getMonth();
+          return (
+            <div className='daysContainer'>
+                {month}
+            </div>
+          )
+      }
+  }
+
+  class Input extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            month: 0
+        };
+        this.handleMonthChange = this.handleMonthChange.bind(this);
+    }
+
+      getMonths = () => {
+        return months.map(function(item,index){
+            return <option key={index}>{item}</option>
+        });
+      }
+
+      getYears = () => {
+        let years = [];
+        for (var i=0; i<9; i++){
+            years.push(2019 - 4 + i);
+        }
+        const yearsEls = years.map(function(item, index) {
+            return(
+                <option key={index}>{item}</option>
+            )
+        });
+        return yearsEls;
+        }
+
+        handleMonthChange = (event) => {
+            this.props.onMonthChange(event.target.selectedIndex);
+        }
+
+        handleYearChange = (event) => {
+            this.props.onYearChange(parseInt(event.target.value));
+        }
+
+      render() {
+          const yearsEls = this.getYears();
+          const monthsEl = this.getMonths();
+          return (
+            <div className='input'>
+                <select className='select' value={months[currentMonth]} onChange={this.handleMonthChange}>{monthsEl}</select>
+                <select className='select' value={currentYear} onChange={this.handleYearChange}>{yearsEls}</select>
+            </div>
+          )
+      }
+  }
+
+   ReactDOM.render(
+        <App />,
+        document.getElementById('root')
+      );
+
+
+</script>
+</body>
+</html>
